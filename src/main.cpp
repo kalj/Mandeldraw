@@ -1,7 +1,7 @@
 
 /*
  * @(#)main.cpp
- * Last changed: <2010-02-27 21:49:46 CET>
+ * Last changed: <2010-03-03 20:14:02 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -24,21 +24,9 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-    int n,m;
-
-    if(argc != 3)
-    {
-	cerr << "Wrong number of input arguments." << endl;
-	cerr << "Usage: ./mandeldraw <xres> <yres>" << endl;
-	exit(1);
-    }
-    
-    sscanf(argv[1], "%d",&n);
-    sscanf(argv[2], "%d",&m);
-
     glutInit(&argc, argv);
     
-    glutInitDisplayMode(GLUT_RGB);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(INITIAL_WIN_WIDTH, INITIAL_WIN_HEIGHT);
 
     glutCreateWindow("Mandeldraw 1.0");

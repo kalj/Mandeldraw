@@ -1,6 +1,6 @@
 /*
  * @(#)mandeldraw.cpp
- * Last changed: <2010-02-28 08:21:03 CET>
+ * Last changed: <2010-03-03 20:31:16 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -136,7 +136,7 @@ void displayFunc()
     }
 
 
-    glFlush();
+    glutSwapBuffers();
 }
 
 
