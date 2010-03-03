@@ -1,7 +1,7 @@
 /*
  * @(#)mandelbuffer.h
  * @author Karl Ljungkvist
- * Last changed: <2010-02-28 15:43:45 CET>
+ * Last changed: <2010-03-03 22:02:41 CET>
  *
  *   
  */
@@ -38,6 +38,7 @@ public:
     GLuint textureId;
 private:
     const void colorize(float *dest, double param);
+    void compute_pixel(int row, int col, double lly);
     bool uptodate;
     double ulx;
     double uly;

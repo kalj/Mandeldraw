@@ -1,6 +1,6 @@
 /*
  * @(#)mandelbuffer.cpp
- * Last changed: <2010-02-28 16:38:42 CET>
+ * Last changed: <2010-03-03 22:04:21 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -12,6 +12,7 @@
 
 using namespace std;
 
+#include "omp.h"
 #include "mandelbuffer.h"
 #include "colorspaces.h"
 #include "mousebox.h"
@@ -77,67 +78,15 @@ void Mbuffer::compute()
     clock_t t1 = clock();
     
     double lly = this->uly - (this->height-1)*this->dx;
-	    
-    for(int row=0; row < this->height; row++)
+    int row, col;
+
+#pragma omp parallel for private(col,row)
+    for(row=0; row < this->height; row++)
     {
-	for(int col=0; col < this->width; col++)
+	for(col=0; col < this->width; col++)
 	{
-	    double res;
+	    compute_pixel(row,col,lly);
 
-	    double x = this->ulx + col*this->dx;
-	    double y = lly + row*this->dx;
-	    
-	    double p = sqrt((x - 0.25)*(x - 0.25) + y*y);
-
-	    if( x < p- 2*p*p + 0.25 || (x + 1)*(x + 1) + y*y < 0.0625)
-	    {
-	    	res = 0;
-		
-	    }
-	    else
-	    {
-		int k;
-		double zx = 0;
-		double zy = 0;
-		double temp;
-		for (k=1; zx*zx + zy*zy <4 && k<max_iterations ; k++)
-		{
-		    temp = zx;
-		    zx = zx*zx - zy*zy + x;
-		    zy = 2*temp*zy + y;
-		}
-
-		// if we escaped, perform two additional rounds
-		if(k < max_iterations)
-		{
-
-		    temp = zx;
-		    zx = zx*zx - zy*zy + x;
-		    zy = 2*temp*zy + y;
-
-		    temp = zx;
-		    zx = zx*zx - zy*zy + x;
-		    zy = 2*temp*zy + y;
-		    
-		    res = k+ 2 + 1 - log2(.5*log2(zx*zx + zy*zy));
-		}
-		else
-		{
-		    res = 0;
-		}
-
-	    }
-	    
-	    if (res == 0)
-	    {
-		this->pixels[(row*this->width + col)*3] = 0;
-	    	this->pixels[(row*this->width + col)*3 +1] = 0;
-	    	this->pixels[(row*this->width + col)*3 +2] = 0;
-	    }
-	    else
-	    {
-		colorize(pixels + (row*width + col)*3, res);
-	    }
 	}
     }
 
@@ -148,6 +97,67 @@ void Mbuffer::compute()
     cout << "Time in compute: "<< ((double)(t2-t1))/CLOCKS_PER_SEC << " s" << endl;
 }
 
+
+void Mbuffer::compute_pixel(int row, int col, double lly)
+{
+    double x = this->ulx + col*this->dx;
+    double y = lly + row*this->dx;
+    
+    double p = sqrt((x - 0.25)*(x - 0.25) + y*y);
+    
+    double res;
+
+    if( x < p- 2*p*p + 0.25 || (x + 1)*(x + 1) + y*y < 0.0625)
+    {
+	res = 0;
+	
+    }
+    else
+    {
+	int k;
+	double zx = 0;
+	double zy = 0;
+	double temp;
+	for (k=1; zx*zx + zy*zy <4 && k<max_iterations ; k++)
+	{
+	    temp = zx;
+	    zx = zx*zx - zy*zy + x;
+	    zy = 2*temp*zy + y;
+	}
+
+	// if we escaped, perform two additional rounds
+	if(k < max_iterations)
+	{
+
+	    temp = zx;
+	    zx = zx*zx - zy*zy + x;
+	    zy = 2*temp*zy + y;
+
+	    temp = zx;
+	    zx = zx*zx - zy*zy + x;
+	    zy = 2*temp*zy + y;
+		    
+	    res = k+ 2 + 1 - log2(.5*log2(zx*zx + zy*zy));
+	}
+	else
+	{
+	    res = 0;
+	}
+
+    }
+	    
+    if (res == 0)
+    {
+	this->pixels[(row*this->width + col)*3] = 0;
+	this->pixels[(row*this->width + col)*3 +1] = 0;
+	this->pixels[(row*this->width + col)*3 +2] = 0;
+    }
+    else
+    {
+	colorize(pixels + (row*width + col)*3, res);
+    }
+
+}
 
 const void Mbuffer::colorize(float *dest, double param)
 {
