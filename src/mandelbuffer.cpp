@@ -1,6 +1,6 @@
 /*
  * @(#)mandelbuffer.cpp
- * Last changed: <2010-03-03 22:04:21 CET>
+ * Last changed: <2010-03-04 07:40:28 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -16,6 +16,10 @@ using namespace std;
 #include "mandelbuffer.h"
 #include "colorspaces.h"
 #include "mousebox.h"
+
+#ifdef _WIN32 
+#define GL_CLAMP_TO_EDGE 0x812F
+#endif
 
 const rgbf tint1 = {0,
 		    0,

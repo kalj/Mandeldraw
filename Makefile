@@ -1,19 +1,40 @@
 ### Makefile.tpl - 
 ## 
 ## Author: Karl Ljungkvist
-## Last changed: <2010-03-03 22:04:57 CET>
+## Last changed: <2010-03-04 07:59:43 CET>
 
 
 CC = g++
 CFLAGS = -Wall -O3 -I./src -fopenmp
-PROG = mandeldraw
 
 
-ifeq ($(shell uname),Darwin)
-	LIBS = -framework OpenGL -framework GLUT
+@WINOS = $(shell echo %OS%)
+@UNOS = $(shell uname)
+
+ifeq ($(WINOS),Windows_NT)
+
+PROG = mandeldraw.exe
+LIBS = -lfreeglut -lglu32 -lopengl32
+RMCMD = del
+
 else
-	LIBS = -lglut -lGLU
+
+PROG = mandeldraw
+RMCMD = rm -f
+
+ifeq ($(UNOS),Darwin)
+
+LIBS = -framework OpenGL -framework GLUT
+
+else
+
+LIBS = -lglut -lGLU
+
 endif
+endif
+
+
+
 
 all: $(PROG)
 
@@ -36,7 +57,7 @@ build/mandelwindow.o: src/mandelwindow.h src/mandelwindow.cpp
 	$(CC) -c $(CFLAGS) -o $@ src/mandelwindow.cpp
 
 clean:
-	rm -f $(PROG) build/mandeldraw.o build/mandelbuffer.o build/colorspaces.o build/mousebox.o
+	$(RMCMD) $(PROG) build/mandeldraw.o build/mandelbuffer.o build/colorspaces.o build/mousebox.o
 
 
 
