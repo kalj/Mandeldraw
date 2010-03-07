@@ -1,14 +1,14 @@
 /*
  * @(#)mandeldraw.cpp
- * Last changed: <2010-03-07 21:51:39 CET>
+ * Last changed: <2010-03-07 23:13:46 CET>
  * @author Karl Ljungkvist
  *
  * 
  *
  */
 
-#include <iostream>
 #include <cmath>
+#include <cstdio>
 
 #ifdef __APPLE__
 #include <OpenGL/OpenGL.h>
@@ -42,6 +42,40 @@ void keyFunc(unsigned char key, int x, int y)
 {
     if(key == ESCAPE || key == 'q')
 	exitFunc();
+    else if(key == 'i')
+    {
+	tex->incrementInitialMaxIter();
+	glutPostRedisplay();
+    }
+    else if(key == 'I')
+    {
+	tex->decrementInitialMaxIter();
+	glutPostRedisplay();
+    }
+    else if(key == 'a' || key == 'A')
+    {
+	int lvl;
+	
+	printf("Set level of supersampling (give square root of number of points per ");
+	printf("pixel). Please give something reasonable (i.e. 1-5): ");
+	
+	
+	if(scanf("%d",&lvl) == EOF)
+	{
+	    fprintf(stderr, "Bogus input.\n");
+	}
+	else if(lvl > 5 || lvl < 1)
+	{
+	    fprintf(stderr,"Number out of range\n");
+	}
+	else
+	{
+	    antialiasingLvl = lvl;
+
+	    tex->resize(lvl*win.getWidth(), lvl*win.getHeight());
+	    glutPostRedisplay();
+	}
+    }
 
 }
 

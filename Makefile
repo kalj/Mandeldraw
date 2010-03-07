@@ -1,11 +1,12 @@
 ### Makefile.tpl - 
 ## 
 ## Author: Karl Ljungkvist
-## Last changed: <2010-03-07 21:50:58 CET>
+## Last changed: <2010-03-07 22:44:24 CET>
 
 
 CC = g++
-CFLAGS = -Wall -O3 -I./src -fopenmp -g
+DEBUG = -g -DDEBUG
+CFLAGS = -Wall -O3 -I./src -fopenmp $(DEBUG)
 PROG = mandeldraw
 
 

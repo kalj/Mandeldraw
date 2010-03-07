@@ -1,7 +1,7 @@
 /*pp
  * @(#)mtexture.h
  * @author Karl Ljungkvist
- * Last changed: <2010-03-07 22:13:20 CET>
+ * Last changed: <2010-03-07 22:41:30 CET>
  *
  *   
  */
@@ -28,8 +28,12 @@ class Mtexture
 public:
     Mtexture(double ulx, double uly, double dx, int width, int height, int maxIter);
     ~Mtexture(){delete[] pixels;}
+    const int getWidth() { return width;}
+    const int getHeight() { return height;}
     void zoomToBox(Mousebox &box);
     void resize(int w, int h);
+    void incrementInitialMaxIter() { initialMaxIter += 10; outdate(); }
+    void decrementInitialMaxIter() { initialMaxIter -= 10; outdate(); }
     void outdate(){uptodate = false;}
     void compute();
     void bind();

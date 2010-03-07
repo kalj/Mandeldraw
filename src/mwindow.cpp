@@ -1,6 +1,6 @@
 /*
  * @(#)mwindow.cpp
- * Last changed: <2010-03-07 20:51:32 CET>
+ * Last changed: <2010-03-07 22:44:18 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -38,21 +38,19 @@ bool Mwin::reshape(int w, int h){
 // --- set up matrix for drawing in window coordinates ----
 
 void Mwin::beginWinCoord(){
-    LOG("beginWinCoord()%c",'\n');
+    // LOG("beginWinCoord()%c",'\n');
     glDisable(GL_TEXTURE_2D);
     glMatrixMode(GL_MODELVIEW);
     
     glPushMatrix();
     glTranslatef(0,1.0,0);
     glScalef(1.0,-1.0, 0.0);
-    // glScalef(1.0/float(width),1.0/float(height), 0.0);
-
  }
 
 // --- ...and reset it ----
 
 void Mwin::endWinCoord(){
-    LOG("endWinCoord()%c",'\n');
+    // LOG("endWinCoord()%c",'\n');
     glPopMatrix();
 
 }

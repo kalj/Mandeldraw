@@ -1,6 +1,6 @@
 /*
  * @(#)mtexture.cpp
- * Last changed: <2010-03-07 22:13:30 CET>
+ * Last changed: <2010-03-07 22:38:12 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -93,8 +93,6 @@ void Mtexture::resize(int w, int h)
     this->pixels = new float[3*this->width*this->height];
     this->outdate();
 }
-
-
 
 
 
