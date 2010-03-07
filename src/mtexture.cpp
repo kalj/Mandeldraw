@@ -1,6 +1,6 @@
 /*
- * @(#)mandelbuffer.cpp
- * Last changed: <2010-03-03 22:04:21 CET>
+ * @(#)mtexture.cpp
+ * Last changed: <2010-03-07 22:13:30 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -8,14 +8,25 @@
  */
 
 #include <iostream>
+#include <ctime>
+
+#ifdef _WIN32
+#include "winmath.h"
+#else
 #include <cmath>
+#endif
 
 using namespace std;
 
 #include "omp.h"
-#include "mandelbuffer.h"
+#include "mtexture.h"
 #include "colorspaces.h"
 #include "mousebox.h"
+#include "log.h"
+
+#ifdef _WIN32 
+#define GL_CLAMP_TO_EDGE 0x812F
+#endif
 
 const rgbf tint1 = {0,
 		    0,
@@ -27,18 +38,25 @@ const rgbf tint2 = {252.0/255,
 hslf tint1_hsl;
 hslf tint2_hsl;
 
-Mbuffer::Mbuffer(double ulx, double uly, double dx, int width, int height)
+
+void colorize(float *dest, double param, int maxIter);
+
+
+Mtexture::Mtexture(double ulx, double uly, double dx, int width, int height, int maxIter)
 {
 
+    LOG("Mtexture::Mtexture(%f, %f, %f, %d, %d)\n",ulx,uly,dx,width,height);
+    
     this->ulx = ulx;
     this->uly = uly;
     this->dx = dx;
     this->width = width;
     this->height = height;
-    this->max_iterations = INITIAL_MAX_ITERATIONS;
+
     
-    this->pixels = new float[3*width*height];
-    // this->pixels.reserve(3*width*height);
+    this->initialMaxIter = maxIter;
+    
+    this->pixels = new float[3*this->width*this->height];
     rgbf2hslf(&tint1_hsl,&tint1);
     rgbf2hslf(&tint2_hsl,&tint2);
 
@@ -47,45 +65,69 @@ Mbuffer::Mbuffer(double ulx, double uly, double dx, int width, int height)
     this->outdate();
 }
 
-void Mbuffer::zoomToBox(Mousebox &box)
+void Mtexture::zoomToBox(Mousebox &box)
 {
-    this-> ulx = this->ulx + this->dx*box.click_x;
-    this-> uly =  this->uly - this->dx*box.click_y;
+    LOG("Mtexture::zoomToBox(box)%c",'\n');
+    
+    this-> ulx += this->width*this->dx*box.click_x;
+    this-> uly -= this->height*this->dx*box.click_y;
 
-    this->dx = this->dx * double(box.curr_x - box.click_x) / double(this->width);
-    this->max_iterations = (INITIAL_MAX_ITERATIONS) *
-	(1 - log2(double(this->dx)/INITIAL_DX));
+    this->dx = this->dx * (box.curr_x - box.click_x);
+
+    LOG("   ulx: %f, uly: %f, dx: %f\n", this->ulx, this->uly, this->dx);
 
     this->outdate();
 }
 
-void Mbuffer::resize(int w, int h)
+void Mtexture::resize(int w, int h)
 {
-    this->dx *= double(this->height) / double(h);
+    LOG("Mtexture::resize(%d, %d)\n",w,h);
+    
+    this->dx = this->dx * double(this->height) / double(h);
+    LOG("   this->dx: %f\n",this->dx);
+    
     this->width = w;
     this->height = h;
 
     delete[] this->pixels;
-    this->pixels = new float[3*w*h];
-    this->max_iterations = (INITIAL_MAX_ITERATIONS) *
-	(1 - log2(double(this->dx)/INITIAL_DX));
-
+    this->pixels = new float[3*this->width*this->height];
     this->outdate();
-    
 }
-void Mbuffer::compute()
+
+
+
+
+
+
+/**
+ * Loops through all the texels
+ *
+ * 
+ */
+
+
+void Mtexture::compute()
 {
+
+    LOG("Mtexture::compute()%c",'\n');
     clock_t t1 = clock();
     
     double lly = this->uly - (this->height-1)*this->dx;
+    LOG("   uly: %f, lly: %f, height: %d, dx: %f\n", this->uly, lly, this->height, this->dx);
     int row, col;
 
-#pragma omp parallel for private(col,row)
+    
+    int maxIter = this->initialMaxIter * (1 - log2(this->dx / INITIAL_DX));
+
+    
+    LOG("   maxIter: %d\n", maxIter);
+    
+#pragma omp parallel for private(col,row) schedule(dynamic)
     for(row=0; row < this->height; row++)
     {
 	for(col=0; col < this->width; col++)
 	{
-	    compute_pixel(row,col,lly);
+	    compute_pixel(row,col,lly, maxIter);
 
 	}
     }
@@ -98,7 +140,10 @@ void Mbuffer::compute()
 }
 
 
-void Mbuffer::compute_pixel(int row, int col, double lly)
+
+
+inline
+void Mtexture::compute_pixel(int row, int col, double lly, int maxIter)
 {
     double x = this->ulx + col*this->dx;
     double y = lly + row*this->dx;
@@ -118,7 +163,7 @@ void Mbuffer::compute_pixel(int row, int col, double lly)
 	double zx = 0;
 	double zy = 0;
 	double temp;
-	for (k=1; zx*zx + zy*zy <4 && k<max_iterations ; k++)
+	for (k=1; zx*zx + zy*zy <4 && k<maxIter ; k++)
 	{
 	    temp = zx;
 	    zx = zx*zx - zy*zy + x;
@@ -126,7 +171,7 @@ void Mbuffer::compute_pixel(int row, int col, double lly)
 	}
 
 	// if we escaped, perform two additional rounds
-	if(k < max_iterations)
+	if(k < maxIter)
 	{
 
 	    temp = zx;
@@ -154,28 +199,33 @@ void Mbuffer::compute_pixel(int row, int col, double lly)
     }
     else
     {
-	colorize(pixels + (row*width + col)*3, res);
+	colorize(pixels + (row*width + col)*3, res, maxIter);
     }
 
 }
 
-const void Mbuffer::colorize(float *dest, double param)
+inline
+void colorize(float *dest, double param,int maxIter)
 {
-    if( int(10*(param)/max_iterations) % 2 == 0)
+    hslf t1 = tint1_hsl;
+    hslf t2 = tint2_hsl;
+    
+
+    if( int(10*(param)/maxIter) % 2 == 0)
     {
-	tint1_hsl.l = 0.5 + 0.5*sin(5*M_PI*(2*param/max_iterations - 0.5));
-	tint2_hsl.l = 0;
+	t1.l = 0.5 + 0.5*sin(5*M_PI*(2*param/maxIter - 0.5));
+	t2.l = 0;
     }
     else
     {
-	tint1_hsl.l = 0;
-	tint2_hsl.l = 0.5 + 0.5*sin(5*M_PI*(2*param/max_iterations - 0.5));
+	t1.l = 0;
+	t2.l = 0.5 + 0.5*sin(5*M_PI*(2*param/maxIter - 0.5));
     }
     
     rgbf col1, col2;
     
-    hslf2rgbf(&col1,&tint1_hsl);
-    hslf2rgbf(&col2,&tint2_hsl);
+    hslf2rgbf(&col1,&t1);
+    hslf2rgbf(&col2,&t2);
     
     dest[0] = col1.r + col2.r;
     dest[1] = col1.g + col2.g;
@@ -183,7 +233,7 @@ const void Mbuffer::colorize(float *dest, double param)
 }
 
 
-void Mbuffer::bind()
+void Mtexture::bind()
 {
     glBindTexture(GL_TEXTURE_2D, this->textureId); //Tell OpenGL which texture to edit
 
@@ -201,7 +251,7 @@ void Mbuffer::bind()
 }
 
 
-void Mbuffer::draw()
+void Mtexture::draw()
 {
     if(!this->uptodate)
     {

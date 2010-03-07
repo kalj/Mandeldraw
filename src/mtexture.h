@@ -1,13 +1,13 @@
-/*
- * @(#)mandelbuffer.h
+/*pp
+ * @(#)mtexture.h
  * @author Karl Ljungkvist
- * Last changed: <2010-03-03 22:02:41 CET>
+ * Last changed: <2010-03-07 22:13:20 CET>
  *
  *   
  */
 
-#ifndef _MANDELBUFFER_H
-#define _MANDELBUFFER_H
+#ifndef _MTEXTURE_H
+#define _MTEXTURE_H
 
 #ifdef __APPLE__
 #include <OpenGL/OpenGL.h>
@@ -16,19 +16,18 @@
 #include <GL/freeglut.h>
 #endif
 
-#define INITIAL_MAX_ITERATIONS 120
-#define INITIAL_DX 3.0
+#define INITIAL_DX 0.01
 
 // #include "mousebox.h"
 // #include <vector>
 class Mousebox;
 
 
-class Mbuffer
+class Mtexture
 {
 public:
-    Mbuffer(double ulx, double uly, double dx, int width, int height);
-    ~Mbuffer(){delete[] pixels;}
+    Mtexture(double ulx, double uly, double dx, int width, int height, int maxIter);
+    ~Mtexture(){delete[] pixels;}
     void zoomToBox(Mousebox &box);
     void resize(int w, int h);
     void outdate(){uptodate = false;}
@@ -37,20 +36,19 @@ public:
     void draw();
     GLuint textureId;
 private:
-    const void colorize(float *dest, double param);
-    void compute_pixel(int row, int col, double lly);
+    void compute_pixel(int row, int col, double lly, int maxIter);
     bool uptodate;
     double ulx;
     double uly;
     double dx;
     int width;
     int height;
-    int max_iterations;
+    int initialMaxIter;
     float *pixels;
     // vector pixels;
 };
 
 
 
-#endif /* _MANDELBUFFER_H */
+#endif /* _MTEXTURE_H */
 

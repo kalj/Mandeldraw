@@ -1,11 +1,11 @@
 ### Makefile.tpl - 
 ## 
 ## Author: Karl Ljungkvist
-## Last changed: <2010-03-03 22:04:57 CET>
+## Last changed: <2010-03-07 21:50:58 CET>
 
 
 CC = g++
-CFLAGS = -Wall -O3 -I./src -fopenmp
+CFLAGS = -Wall -O3 -I./src -fopenmp -g
 PROG = mandeldraw
 
 
@@ -17,26 +17,26 @@ endif
 
 all: $(PROG)
 
-$(PROG): src/main.cpp build/mandeldraw.o build/mandelbuffer.o build/colorspaces.o build/mousebox.o build/mandelwindow.o
+$(PROG): src/main.cpp build/mandeldraw.o build/mtexture.o build/colorspaces.o build/mousebox.o build/mwindow.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
-build/mandeldraw.o: src/mandeldraw.h src/mandeldraw.cpp src/mousebox.h src/mandelbuffer.h src/mandelwindow.h
+build/mandeldraw.o: src/mandeldraw.h src/mandeldraw.cpp src/mousebox.h src/mtexture.h src/mwindow.h src/log.h
 	$(CC) -c $(CFLAGS) -o $@ src/mandeldraw.cpp $(LIBS)
 
-build/mandelbuffer.o: src/mandelbuffer.h src/mandelbuffer.cpp 
-	$(CC) -c $(CFLAGS) -o $@ src/mandelbuffer.cpp $(LIBS)
+build/mtexture.o: src/mtexture.h src/mtexture.cpp src/log.h
+	$(CC) -c $(CFLAGS) -o $@ src/mtexture.cpp $(LIBS)
 
-build/colorspaces.o: src/colorspaces.h src/colorspaces.cpp
+build/colorspaces.o: src/colorspaces.h src/colorspaces.cpp src/log.h
 	$(CC) -c $(CFLAGS) -o $@ src/colorspaces.cpp
 
-build/mousebox.o: src/mousebox.cpp src/mousebox.h
+build/mousebox.o: src/mousebox.cpp src/mousebox.h src/log.h
 	$(CC) -c $(CFLAGS) -o $@ src/mousebox.cpp
 
-build/mandelwindow.o: src/mandelwindow.h src/mandelwindow.cpp
-	$(CC) -c $(CFLAGS) -o $@ src/mandelwindow.cpp
+build/mwindow.o: src/mwindow.h src/mwindow.cpp src/log.h
+	$(CC) -c $(CFLAGS) -o $@ src/mwindow.cpp
 
 clean:
-	rm -f $(PROG) build/mandeldraw.o build/mandelbuffer.o build/colorspaces.o build/mousebox.o
+	rm -f $(PROG) build/mandeldraw.o build/mtexture.o build/colorspaces.o build/mousebox.o build/mwindow.o
 
 
 

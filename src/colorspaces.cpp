@@ -1,13 +1,17 @@
 /*
  * @(#)colorspaces.cpp
- * Last changed: <2010-02-28 15:31:09 CET>
+ * Last changed: <2010-03-05 16:10:47 CET>
  * @author Karl Ljungkvist
  *
  * 
  *
  */
 
+#ifdef _WIN32
+#include "mymath.h"
+#else
 #include <cmath>
+#endif
 
 #include "colorspaces.h"
 

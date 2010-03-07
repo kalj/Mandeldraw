@@ -1,7 +1,7 @@
 /*
  * @(#)mandeldraw.h
  * @author Karl Ljungkvist
- * Last changed: <2010-02-28 15:43:47 CET>
+ * Last changed: <2010-03-07 21:51:37 CET>
  *
  *   
  */
@@ -11,8 +11,11 @@
 
 #define INITIAL_WIN_WIDTH 300
 #define INITIAL_WIN_HEIGHT 200
-#define INITIAL_UPPER_LEFT_X -2
-#define INITIAL_UPPER_LEFT_Y 1
+#define INITIAL_UPPER_LEFT_X -2.0
+#define INITIAL_UPPER_LEFT_Y 1.0
+
+extern int antialiasingLvl;
+
 
 // void timerFunc(int value);
 
@@ -28,7 +31,7 @@ void reshapeFunc(int w, int h);
 
 void displayFunc();
 
-void myInit();
+void myInit(int initialMaxIterations);
 // int getDelay();
 
 void exitFunc();
