@@ -1,6 +1,6 @@
 /*
  * @(#)mandeldraw.cpp
- * Last changed: <2010-03-07 23:13:46 CET>
+ * Last changed: <2010-03-09 10:19:39 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -36,7 +36,7 @@ Mousebox box;
 
 Mwin win;
 
-int antialiasingLvl;
+// int antialiasingLvl;
 
 void keyFunc(unsigned char key, int x, int y)
 {
@@ -56,23 +56,21 @@ void keyFunc(unsigned char key, int x, int y)
     {
 	int lvl;
 	
-	printf("Set level of supersampling (give square root of number of points per ");
-	printf("pixel). Please give something reasonable (i.e. 1-5): ");
+	printf("Set level of supersampling (give l where 2^l * 2^l is the number of points per ");
+	printf("pixel). Please give something reasonable (i.e. 0-3): ");
 	
 	
 	if(scanf("%d",&lvl) == EOF)
 	{
 	    fprintf(stderr, "Bogus input.\n");
 	}
-	else if(lvl > 5 || lvl < 1)
+	else if(lvl > 3 || lvl < 0)
 	{
 	    fprintf(stderr,"Number out of range\n");
 	}
 	else
 	{
-	    antialiasingLvl = lvl;
-
-	    tex->resize(lvl*win.getWidth(), lvl*win.getHeight());
+	    tex->setAALvl(lvl);
 	    glutPostRedisplay();
 	}
     }
@@ -110,16 +108,17 @@ void mouseMotionFunc(int x, int y)
     
 }
 
-void myInit(int initialMaxIterations)
+void myInit(int initialMaxIterations, int aaLvl)
 {
     win.reshape(INITIAL_WIN_WIDTH, INITIAL_WIN_HEIGHT);
     
     tex = new Mtexture(INITIAL_UPPER_LEFT_X,
-		      INITIAL_UPPER_LEFT_Y,
-		      INITIAL_DX / antialiasingLvl,
-		      antialiasingLvl * INITIAL_WIN_WIDTH,
-		      antialiasingLvl * INITIAL_WIN_HEIGHT,
-		      initialMaxIterations);
+		       INITIAL_UPPER_LEFT_Y,
+		       INITIAL_DX,
+		       INITIAL_WIN_WIDTH,
+		       INITIAL_WIN_HEIGHT,
+		       initialMaxIterations,
+		       aaLvl);
 
     box.setRatio( double(INITIAL_WIN_HEIGHT) / (INITIAL_WIN_WIDTH));
     
@@ -136,8 +135,7 @@ void reshapeFunc(int w, int h)
     // returnes true if changed
     if(win.reshape(w,h))
     {
-	tex->resize(antialiasingLvl*w,
-		    antialiasingLvl*h);
+	tex->resize(w,h);
     }
 
     glutPostRedisplay();

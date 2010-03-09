@@ -1,6 +1,6 @@
 /*
  * @(#)mtexture.cpp
- * Last changed: <2010-03-07 22:38:12 CET>
+ * Last changed: <2010-03-09 10:20:31 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <ctime>
+#include <cstdlib>
 
 #ifdef _WIN32
 #include "winmath.h"
@@ -40,29 +41,36 @@ hslf tint2_hsl;
 
 
 void colorize(float *dest, double param, int maxIter);
+void compute_pixel(float *dest, double x, double y, int maxIter);
 
-
-Mtexture::Mtexture(double ulx, double uly, double dx, int width, int height, int maxIter)
+Mtexture::Mtexture(double ulx, double uly, double dx, int width, int height, int maxIter, int aaLvl)
 {
 
-    LOG("Mtexture::Mtexture(%f, %f, %f, %d, %d)\n",ulx,uly,dx,width,height);
+    LOG("Mtexture::Mtexture(%f, %f, %f, %d, %d, %d, %d)\n",ulx,uly,dx,width,height, maxIter, aaLvl);
     
     this->ulx = ulx;
     this->uly = uly;
     this->dx = dx;
     this->width = width;
     this->height = height;
-
-    
     this->initialMaxIter = maxIter;
+    this->aaLvl = aaLvl;
     
     this->pixels = new float[3*this->width*this->height];
+    
     rgbf2hslf(&tint1_hsl,&tint1);
     rgbf2hslf(&tint2_hsl,&tint2);
 
     glGenTextures(1, &(this->textureId)); //Make room for our texture
 
     this->outdate();
+}
+
+
+Mtexture::~Mtexture()
+{
+    glDeleteTextures(1, &(this->textureId));
+    delete[] pixels;
 }
 
 void Mtexture::zoomToBox(Mousebox &box)
@@ -89,13 +97,25 @@ void Mtexture::resize(int w, int h)
     this->width = w;
     this->height = h;
 
+    LOG("    new size of array: %d\n",3*this->width*this->height);
     delete[] this->pixels;
     this->pixels = new float[3*this->width*this->height];
+
     this->outdate();
 }
 
 
+void Mtexture::setAALvl(int lvl)
+{
 
+    if(lvl != this->aaLvl)
+    {
+	this->aaLvl = lvl;
+	
+	this->outdate();
+	
+    }
+}
 
 /**
  * Loops through all the texels
@@ -114,20 +134,83 @@ void Mtexture::compute()
     LOG("   uly: %f, lly: %f, height: %d, dx: %f\n", this->uly, lly, this->height, this->dx);
     int row, col;
 
-    
-    int maxIter = this->initialMaxIter * (1 - log2(this->dx / INITIAL_DX));
+    const int n_side = 1 << this->aaLvl;
+    const int n_samples = n_side*n_side;
 
+    int maxIter = this->initialMaxIter * (1 - log2( (this->dx/ n_side) / INITIAL_DX));
+
+    LOG("   n_side: %d, maxIter: %d\n", n_side, maxIter);
     
-    LOG("   maxIter: %d\n", maxIter);
-    
-#pragma omp parallel for private(col,row) schedule(dynamic)
-    for(row=0; row < this->height; row++)
+    const int nrows = this->height;
+    const int ncols = this->width;
+
+    double x;
+    double y;
+    switch(this->aaLvl)
     {
-	for(col=0; col < this->width; col++)
+    case 0:
+#pragma omp parallel for private(col,row,x,y) schedule(dynamic)
+	for(row=0; row < nrows; row++)
 	{
-	    compute_pixel(row,col,lly, maxIter);
-
+	    for(col=0; col < ncols; col++)
+	    {
+		
+		x = this->ulx + col*this->dx;
+		y = lly + row*this->dx;
+		
+		compute_pixel(this->pixels + 3*(row*ncols + col), x, y, maxIter);
+		
+	    }
 	}
+	break;
+    case 1:
+    case 2:
+    case 3:
+	int i;
+	float buffer[3];
+	double x_local;
+	double y_local;
+	
+#pragma omp parallel for private(col,row,buffer,i,x,y,x_local,y_local) schedule(dynamic)
+	for(row=0; row < nrows; row++)
+	{
+	    for(col=0; col < ncols; col++)
+	    {
+		
+		x = this->ulx + col*this->dx;
+		y = lly + row*this->dx;
+
+		this->pixels[3*(row*ncols + col)] = 0;
+		this->pixels[3*(row*ncols + col) + 1] = 0;
+		this->pixels[3*(row*ncols + col) + 2] = 0;
+
+		
+		for(i=0; i<n_samples; i++)
+		{
+		    x_local = x + this->dx * ( (0.5 + (i % n_side)) / n_side  - 0.5);
+		    y_local = y + this->dx * ( (0.5 + (i / n_side)) / n_side  - 0.5);
+		    
+		    compute_pixel(buffer,
+				  x_local,
+				  y_local,
+				  maxIter);
+		
+		    this->pixels[3*(row*ncols + col)] += buffer[0];
+		    this->pixels[3*(row*ncols + col) + 1] += buffer[1];
+		    this->pixels[3*(row*ncols + col) + 2] += buffer[2];
+		}
+		
+		this->pixels[3*(row*ncols + col)] /= n_samples;
+		this->pixels[3*(row*ncols + col) + 1] /= n_samples;
+		this->pixels[3*(row*ncols + col) + 2] /= n_samples;
+	    }
+	}
+	
+	break;
+    default:
+	cerr << "Invalid antialiasing level specified" << endl;
+	exit(1);
+	break;
     }
 
     uptodate = true;
@@ -140,12 +223,8 @@ void Mtexture::compute()
 
 
 
-inline
-void Mtexture::compute_pixel(int row, int col, double lly, int maxIter)
+void compute_pixel(float *dest, double x, double y, int maxIter)
 {
-    double x = this->ulx + col*this->dx;
-    double y = lly + row*this->dx;
-    
     double p = sqrt((x - 0.25)*(x - 0.25) + y*y);
     
     double res;
@@ -191,13 +270,14 @@ void Mtexture::compute_pixel(int row, int col, double lly, int maxIter)
 	    
     if (res == 0)
     {
-	this->pixels[(row*this->width + col)*3] = 0;
-	this->pixels[(row*this->width + col)*3 +1] = 0;
-	this->pixels[(row*this->width + col)*3 +2] = 0;
+	dest[0] = 0;
+	dest[1] = 0;
+	dest[2] = 0;
+
     }
     else
     {
-	colorize(pixels + (row*width + col)*3, res, maxIter);
+	colorize(dest, res, maxIter);
     }
 
 }
@@ -234,18 +314,19 @@ void colorize(float *dest, double param,int maxIter)
 void Mtexture::bind()
 {
     glBindTexture(GL_TEXTURE_2D, this->textureId); //Tell OpenGL which texture to edit
-
+    
     //Map the image to the texture
     glTexImage2D(GL_TEXTURE_2D,                //Always GL_TEXTURE_2D
-		 0,                            //0 for now
-		 GL_RGB,                       //Format OpenGL uses for image
-		 this->width, this->height,  	       //Width and height
-		 0,                            //The border of the image
-		 GL_RGB, //GL_RGB, because pixels are stored in RGB format
-		 GL_FLOAT, //GL_UNSIGNED_BYTE, because pixels are stored
-		 		   //as unsigned numbers
-		 this->pixels);               //The actual pixel data
+    		 0,                            //0 for now
+    		 GL_RGB,                       //Format OpenGL uses for image
+    		 this->width, this->height,    //Width and height
+    		 0,                            //The border of the image
+    		 GL_RGB, //GL_RGB, because pixels are stored in RGB format
+    		 GL_FLOAT, //GL_UNSIGNED_BYTE, because pixels are stored
+    		 		   //as unsigned numbers
+    		 this->pixels);               //The actual pixel data
 
+    
 }
 
 
@@ -258,8 +339,6 @@ void Mtexture::draw()
     }
     
 
-    // glDisable(GL_CULL_FACE);
-
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, this->textureId);
     
@@ -267,7 +346,7 @@ void Mtexture::draw()
     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
+    
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
