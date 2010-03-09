@@ -1,14 +1,14 @@
 /*
  * @(#)mandeldraw.cpp
- * Last changed: <2010-03-03 20:31:16 CET>
+ * Last changed: <2010-03-09 10:19:39 CET>
  * @author Karl Ljungkvist
  *
  * 
  *
  */
 
-#include <iostream>
 #include <cmath>
+#include <cstdio>
 
 #ifdef __APPLE__
 #include <OpenGL/OpenGL.h>
@@ -18,9 +18,9 @@
 #endif
 
 #include "mandeldraw.h"
-#include "mandelbuffer.h"
+#include "mtexture.h"
 #include "mousebox.h"
-#include "mandelwindow.h"
+#include "mwindow.h"
 
 using namespace std;
 
@@ -30,32 +30,53 @@ using namespace std;
 #define ENTER 13
 #define BACKSPACE 8
 
-Mbuffer *buf;
+Mtexture *tex;
 
 Mousebox box;
 
 Mwin win;
 
-// void timerFunc(int value)
-// {
-
-// }
+// int antialiasingLvl;
 
 void keyFunc(unsigned char key, int x, int y)
 {
     if(key == ESCAPE || key == 'q')
 	exitFunc();
-    // else if( key == 'u')
-    // {
-    // 	glutPostRedisplay();
-    // }
+    else if(key == 'i')
+    {
+	tex->incrementInitialMaxIter();
+	glutPostRedisplay();
+    }
+    else if(key == 'I')
+    {
+	tex->decrementInitialMaxIter();
+	glutPostRedisplay();
+    }
+    else if(key == 'a' || key == 'A')
+    {
+	int lvl;
+	
+	printf("Set level of supersampling (give l where 2^l * 2^l is the number of points per ");
+	printf("pixel). Please give something reasonable (i.e. 0-3): ");
+	
+	
+	if(scanf("%d",&lvl) == EOF)
+	{
+	    fprintf(stderr, "Bogus input.\n");
+	}
+	else if(lvl > 3 || lvl < 0)
+	{
+	    fprintf(stderr,"Number out of range\n");
+	}
+	else
+	{
+	    tex->setAALvl(lvl);
+	    glutPostRedisplay();
+	}
+    }
+
 }
 
-
-// void specKeyFunc(int key, int x, int y)
-// {
-    
-// }
 
 void mouseFunc(int button, int state, int x, int y)
 {
@@ -63,12 +84,12 @@ void mouseFunc(int button, int state, int x, int y)
     {
 	if(!box.is_active())
 	{
-	    box.click(x,y);
+	    box.click(float(x)/win.getWidth(),float(y)/win.getHeight());
 	}
 	else
 	{
 	    box.release();
-	    buf->zoomToBox(box);
+	    tex->zoomToBox(box);
 	}
     }
     
@@ -80,25 +101,27 @@ void mouseMotionFunc(int x, int y)
 {
     if(box.is_active())
     {
-	box.drag(x,y);
+	box.drag(float(x)/win.getWidth(),float(y)/win.getHeight());
     }
     
     glutPostRedisplay();
     
 }
 
-void myInit()
+void myInit(int initialMaxIterations, int aaLvl)
 {
     win.reshape(INITIAL_WIN_WIDTH, INITIAL_WIN_HEIGHT);
     
-    buf = new Mbuffer(INITIAL_UPPER_LEFT_X, INITIAL_UPPER_LEFT_Y,
-		      INITIAL_DX/(INITIAL_WIN_WIDTH),
-		      INITIAL_WIN_WIDTH, INITIAL_WIN_HEIGHT);
+    tex = new Mtexture(INITIAL_UPPER_LEFT_X,
+		       INITIAL_UPPER_LEFT_Y,
+		       INITIAL_DX,
+		       INITIAL_WIN_WIDTH,
+		       INITIAL_WIN_HEIGHT,
+		       initialMaxIterations,
+		       aaLvl);
 
-    box.setRatio(((double) INITIAL_WIN_HEIGHT) / (INITIAL_WIN_WIDTH));
+    box.setRatio( double(INITIAL_WIN_HEIGHT) / (INITIAL_WIN_WIDTH));
     
-    // buf->compute();
-
     glViewport(0, 0, INITIAL_WIN_WIDTH, INITIAL_WIN_HEIGHT);
 
 }
@@ -107,12 +130,12 @@ void myInit()
 void reshapeFunc(int w, int h)
 {
     glViewport(0, 0, w, h);
-    box.setRatio(((double) h) / w);
+    box.setRatio( float(h) / w);
 
     // returnes true if changed
     if(win.reshape(w,h))
     {
-	buf->resize(w,h);
+	tex->resize(w,h);
     }
 
     glutPostRedisplay();
@@ -125,11 +148,10 @@ void displayFunc()
 {
     glClear(GL_COLOR_BUFFER_BIT );
 
-    buf->draw();
+    tex->draw();
 
     if(box.is_active())
     {
-    	glColor3f(0.5,0,0.5);
     	win.beginWinCoord();
     	box.draw();
     	win.endWinCoord();
@@ -139,16 +161,8 @@ void displayFunc()
     glutSwapBuffers();
 }
 
-
-
-
-// int getDelay()
-// {
-//     return 1;
-// }
-
 void exitFunc()
 {
-    delete buf;
+    delete tex;
     glutLeaveMainLoop();
 }

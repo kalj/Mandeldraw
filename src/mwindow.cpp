@@ -1,6 +1,6 @@
 /*
- * @(#)mandelwindow.cpp
- * Last changed: <2010-02-27 20:07:31 CET>
+ * @(#)mwindow.cpp
+ * Last changed: <2010-03-07 22:44:18 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -17,12 +17,14 @@
 #include <iostream>
 
 using namespace std;
-
-#include "mandelwindow.h"
+#include "log.h"
+#include "mwindow.h"
 
 
 bool Mwin::reshape(int w, int h){
 
+    LOG("Mwin::reshape(%d, %d)\n",w,h);
+    
     if(width != w || height != h)
     {
 	width=w;
@@ -36,22 +38,20 @@ bool Mwin::reshape(int w, int h){
 // --- set up matrix for drawing in window coordinates ----
 
 void Mwin::beginWinCoord(){
-
+    // LOG("beginWinCoord()%c",'\n');
     glDisable(GL_TEXTURE_2D);
     glMatrixMode(GL_MODELVIEW);
     
     glPushMatrix();
     glTranslatef(0,1.0,0);
-    glScalef(1.0,-1.0, 0.0f);
-    glScalef(1.0/float(width),1.0/float(height), 0.0f);
-
+    glScalef(1.0,-1.0, 0.0);
  }
 
 // --- ...and reset it ----
 
 void Mwin::endWinCoord(){
-
-  glPopMatrix();
+    // LOG("endWinCoord()%c",'\n');
+    glPopMatrix();
 
 }
 

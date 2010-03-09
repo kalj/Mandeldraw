@@ -1,7 +1,7 @@
 /*
  * @(#)mousebox.h
  * @author Karl Ljungkvist
- * Last changed: <2010-02-28 08:31:16 CET>
+ * Last changed: <2010-03-07 21:44:37 CET>
  *
  *   
  */
@@ -9,11 +9,11 @@
 #ifndef _MOUSEBOX_H
 #define _MOUSEBOX_H
 
-#include "mandelbuffer.h"
+#include "mtexture.h"
 
 class Mousebox
 {
-    friend void Mbuffer::zoomToBox(Mousebox &box);
+    friend void Mtexture::zoomToBox(Mousebox &box);
 public:
     Mousebox() :
 	click_x(0),
@@ -22,15 +22,15 @@ public:
 	curr_y(0),
 	active(false),
 	ratio(0) {};
-    void click(int x,int y);
-    void drag(int x, int y);
+    void click(float x,float y);
+    void drag(float x, float y);
     void release();
     void draw();
     const bool is_active(){return active;}
     void setRatio(double r){ratio = r;}
 private:
-    int click_x, click_y;
-    int curr_x, curr_y;
+    float click_x, click_y;
+    float curr_x, curr_y;
     bool active;
     double ratio;
 }; 

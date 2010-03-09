@@ -1,6 +1,6 @@
 /*
  * @(#)testcs.cpp
- * Last changed: <2010-02-21 13:59:45 CET>
+ * Last changed: <2010-03-05 16:14:47 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -8,7 +8,11 @@
  */
 
 #include <iostream>
+#ifdef _WIN32
+#include "mymath.h"
+#else
 #include <cmath>
+#endif
 
 using namespace std;
 
