@@ -1,7 +1,7 @@
 
 /*
  * @(#)main.cpp
- * Last changed: <2010-03-09 10:24:41 CET>
+ * Last changed: <2010-03-10 06:51:50 WEST>
  * @author Karl Ljungkvist
  *
  * 
@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <getopt.h>
 
 using namespace std;
 

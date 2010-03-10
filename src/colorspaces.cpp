@@ -1,6 +1,6 @@
 /*
  * @(#)colorspaces.cpp
- * Last changed: <2010-03-05 16:10:47 CET>
+ * Last changed: <2010-03-10 07:20:55 WEST>
  * @author Karl Ljungkvist
  *
  * 
@@ -8,7 +8,7 @@
  */
 
 #ifdef _WIN32
-#include "mymath.h"
+#include "winmath.h"
 #else
 #include <cmath>
 #endif
