@@ -1,7 +1,7 @@
 
 /*
  * @(#)main.cpp
- * Last changed: <2010-03-10 06:51:50 WEST>
+ * Last changed: <2010-03-13 10:02:24 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <getopt.h>
+#include <omp.h>
 
 using namespace std;
 
@@ -56,6 +57,10 @@ int main(int argc, char **argv)
 	}
     }
 
+#ifdef _OPENMP
+    cout << "Using " << omp_get_max_threads() << " threads(s)." << endl;
+#endif
+
     glutInit(&argc, argv);
     
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
@@ -82,7 +87,7 @@ int main(int argc, char **argv)
 
 void usage()
 {
-    cerr << "Usage: mandeldraw [-a <level> ] [-i <iterations>]" << endl
+    cout << "Usage: mandeldraw [-a <level> ] [-i <iterations>]" << endl
 	 << endl
 	 << "       -a : Specifies the level of supersampling (0, 1, 2, 3)." << endl
 	 << "            Note: This is the square root of the 2-logarithm of" << endl

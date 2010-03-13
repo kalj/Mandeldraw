@@ -1,6 +1,6 @@
 /*
  * @(#)mtexture.cpp
- * Last changed: <2010-03-13 08:30:10 CET>
+ * Last changed: <2010-03-13 10:10:16 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -129,7 +129,12 @@ void Mtexture::compute()
 {
 
     LOG("Mtexture::compute()%c",'\n');
-    clock_t t1 = clock();
+    clock_t cpu_tic = clock();
+#ifdef _OPENMP
+    double w_tic, w_toc;
+    w_tic = omp_get_wtime();
+#endif
+    
     
     double lly = this->uly - (this->height-1)*this->dx;
     LOG("   uly: %f, lly: %f, height: %d, dx: %f\n", this->uly, lly, this->height, this->dx);
@@ -215,10 +220,15 @@ void Mtexture::compute()
     }
 
     uptodate = true;
-
     
-    clock_t t2 = clock();
-    cout << "Time in compute: "<< ((double)(t2-t1))/CLOCKS_PER_SEC << " s" << endl;
+    clock_t cpu_toc = clock();
+    cout << "Time in compute:" << endl;
+#ifdef _OPENMP
+    w_toc = omp_get_wtime();
+    cout << "\tWall: "<< w_toc -  w_tic << " s" << endl;
+#endif
+    cout << "\tCPU: "<< ((double)(cpu_toc-cpu_tic))/CLOCKS_PER_SEC << " s" << endl;
+    
 }
 
 
