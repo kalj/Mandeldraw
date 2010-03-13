@@ -1,6 +1,6 @@
 /*
  * @(#)mandeldraw.cpp
- * Last changed: <2010-03-09 10:19:39 CET>
+ * Last changed: <2010-03-13 08:34:21 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -74,6 +74,15 @@ void keyFunc(unsigned char key, int x, int y)
 	    glutPostRedisplay();
 	}
     }
+    else if(key == 'w')
+    {
+	const char *filename = "mandelbrot.bmp";
+	printf("writing current image to file '%s'\n", filename);
+
+	tex->writeToBMP(filename);
+
+    }
+    
 
 }
 

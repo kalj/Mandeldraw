@@ -1,7 +1,7 @@
 /*
  * @(#)mtexture.h
  * @author Karl Ljungkvist
- * Last changed: <2010-03-09 08:47:44 CET>
+ * Last changed: <2010-03-13 08:27:54 CET>
  *
  *   
  */
@@ -36,6 +36,7 @@ public:
     void setAALvl(int lvl);    
     void outdate(){uptodate = false;}
     void draw();
+    void writeToBMP(const char *filename);
     GLuint textureId;
 private:
     void compute();

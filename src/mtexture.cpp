@@ -1,6 +1,6 @@
 /*
  * @(#)mtexture.cpp
- * Last changed: <2010-03-09 10:20:31 CET>
+ * Last changed: <2010-03-13 08:30:10 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -24,6 +24,7 @@ using namespace std;
 #include "colorspaces.h"
 #include "mousebox.h"
 #include "log.h"
+#include "bmpio.h"
 
 #ifdef _WIN32 
 #define GL_CLAMP_TO_EDGE 0x812F
@@ -369,5 +370,11 @@ void Mtexture::draw()
     glTexCoord2f(1.f, 0.f);
     glVertex2f(1.0f, 0.f);
     glEnd();
+    
+}
+
+void Mtexture::writeToBMP(const char *filename)
+{
+    write_to_BMP(filename, this->pixels, width, height);
     
 }
