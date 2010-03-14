@@ -1,7 +1,7 @@
 ### Makefile.tpl - 
 ## 
 ## Author: Karl Ljungkvist
-## Last changed: <2010-03-14 18:35:04 CET>
+## Last changed: <2010-03-14 19:31:57 WEST>
 
 
 ## ----------------------------
@@ -18,7 +18,7 @@ LIBS = -lGL -lglut -lGLU
 else
 ## MinGW
 RMCMD = del
-SLASH = \
+SLASH = \\
 LIBS =  -lfreeglut -lglu32 -lopengl32 
 endif
 
