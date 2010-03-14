@@ -1,7 +1,7 @@
 /*
  * @(#)mtexture.h
  * @author Karl Ljungkvist
- * Last changed: <2010-03-13 08:27:54 CET>
+ * Last changed: <2010-03-14 18:17:31 CET>
  *
  *   
  */
@@ -25,8 +25,11 @@ class Mousebox;
 class Mtexture
 {
 public:
-    Mtexture(double ulx, double uly, double dx, int width, int height, int maxIter, int aaLvl);
+    Mtexture(double ulx, double uly, double dx, int width, int height,
+	     int maxIter, int aaLvl);
     ~Mtexture();
+    void reset(double ulx, double uly, double dx, int width, int height,
+	       int maxIter, int aaLvl);
     const int getWidth() { return width;}
     const int getHeight() { return height;}
     void zoomToBox(Mousebox &box);
@@ -35,11 +38,11 @@ public:
     void decrementInitialMaxIter() { initialMaxIter -= 10; outdate(); }
     void setAALvl(int lvl);    
     void outdate(){uptodate = false;}
+    void compute();
     void draw();
     void writeToBMP(const char *filename);
     GLuint textureId;
 private:
-    void compute();
     void bind();
     bool uptodate;
     double ulx;

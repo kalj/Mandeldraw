@@ -1,6 +1,6 @@
 /*
  * @(#)mandeldraw.cpp
- * Last changed: <2010-03-13 08:34:21 CET>
+ * Last changed: <2010-03-14 18:37:03 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -81,6 +81,23 @@ void keyFunc(unsigned char key, int x, int y)
 
 	tex->writeToBMP(filename);
 
+    }
+    else if(key == 'b')
+    {
+	printf("Benchmarking...\n");
+	double ulx = -1.003817;
+	double uly = 0.282004;
+	double dx = 0.000003;
+	unsigned int height = 600;
+	unsigned int width = 1000;
+	unsigned int maxIter = 120;
+	int aaLvl = 2;
+    
+
+	glutPositionWindow(20,20);
+	glutReshapeWindow(width,height);
+	tex->reset(ulx, uly, dx, width, height, maxIter, aaLvl);
+	glutPostRedisplay();
     }
     
 

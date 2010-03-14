@@ -1,7 +1,7 @@
 
 /*
  * @(#)main.cpp
- * Last changed: <2010-03-13 10:02:24 CET>
+ * Last changed: <2010-03-14 07:04:04 CET>
  * @author Karl Ljungkvist
  *
  * 

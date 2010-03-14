@@ -1,6 +1,6 @@
 /*
  * @(#)mtexture.cpp
- * Last changed: <2010-03-13 10:10:16 CET>
+ * Last changed: <2010-03-14 18:16:52 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -44,7 +44,8 @@ hslf tint2_hsl;
 void colorize(float *dest, double param, int maxIter);
 void compute_pixel(float *dest, double x, double y, int maxIter);
 
-Mtexture::Mtexture(double ulx, double uly, double dx, int width, int height, int maxIter, int aaLvl)
+Mtexture::Mtexture(double ulx, double uly, double dx, int width,
+		   int height, int maxIter, int aaLvl)
 {
 
     LOG("Mtexture::Mtexture(%f, %f, %f, %d, %d, %d, %d)\n",ulx,uly,dx,width,height, maxIter, aaLvl);
@@ -73,6 +74,25 @@ Mtexture::~Mtexture()
     glDeleteTextures(1, &(this->textureId));
     delete[] pixels;
 }
+
+void Mtexture::reset(double ulx, double uly, double dx, int width,
+		     int height, int maxIter, int aaLvl)
+{
+    this->ulx = ulx;
+    this->uly = uly;
+    this->dx = dx;
+    this->width = width;
+    this->height = height;
+    this->initialMaxIter = maxIter;
+    this->aaLvl = aaLvl;
+    
+    delete[] this->pixels;
+    this->pixels = new float[3*this->width*this->height];
+   
+    this->outdate();
+    
+}
+
 
 void Mtexture::zoomToBox(Mousebox &box)
 {
