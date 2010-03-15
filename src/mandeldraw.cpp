@@ -1,6 +1,6 @@
 /*
  * @(#)mandeldraw.cpp
- * Last changed: <2010-03-14 18:37:03 CET>
+ * Last changed: <2010-03-15 19:05:22 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -21,6 +21,7 @@
 #include "mtexture.h"
 #include "mousebox.h"
 #include "mwindow.h"
+#include "log.h"
 
 using namespace std;
 
@@ -56,8 +57,9 @@ void keyFunc(unsigned char key, int x, int y)
     {
 	int lvl;
 	
-	printf("Set level of supersampling (give l where 2^l * 2^l is the number of points per ");
-	printf("pixel). Please give something reasonable (i.e. 0-3): ");
+	printf("Set level of supersampling (give l where 2^l * 2^l\n");
+	printf(" is the number of points per pixel). Please give something\n");
+	printf("reasonable (i.e. 0-3): ");
 	
 	
 	if(scanf("%d",&lvl) == EOF)
@@ -77,14 +79,14 @@ void keyFunc(unsigned char key, int x, int y)
     else if(key == 'w')
     {
 	const char *filename = "mandelbrot.bmp";
-	printf("writing current image to file '%s'\n", filename);
+	INFOLOG("writing current image to file '%s'\n", filename);
 
 	tex->writeToBMP(filename);
 
     }
     else if(key == 'b')
     {
-	printf("Benchmarking...\n");
+	INFOLOG("Benchmarking...%c",'\n');
 	double ulx = -1.003817;
 	double uly = 0.282004;
 	double dx = 0.000003;

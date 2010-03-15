@@ -1,0 +1,35 @@
+### README --- 
+
+## Author: Karl Ljungkvist (k.ljungkvist@gmail.com)
+## Keywords: 
+
+This program displays a pretty view of the Mandelbrot set and its surroundings.
+
+
+------ Synopsis ------
+
+mandeldraw [-v] [-a <level> ] [-i <iterations>]
+
+       -v : Be verbose -- i.e. print maximum info output.
+       -q : Be quiet -- i.e. STFU. (default)
+       -a : Specifies the level of supersampling (0, 1, 2, 3).
+            Note: This is the square root of the 2-logarithm of
+            the number of points per pixel, i.e. l where (2^l)*(2^l)
+            is the number of samples per pixel.
+       -i : Specifies the initial number of iterations used.
+       -h : Print this help.
+
+
+------ Keys ------
+
+In the program the following keys are defined:
+
+    q   : 
+    ESC : Quit the program
+    w	: Write the current view to the bitmap file 'mandelbrot.bmp' in the
+    	  current working directory
+    b	: Benchmark. Jump to a predefined state.
+    i	: Increase the max-iterations base value.
+    I	: Decrease the max-iterations base value.
+    a	: Change the anti aliasing level (will launch a prompt).
+    

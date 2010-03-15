@@ -1,7 +1,7 @@
 ### Makefile.tpl - 
 ## 
 ## Author: Karl Ljungkvist
-## Last changed: <2010-03-14 19:31:57 WEST>
+## Last changed: <2010-03-15 19:00:36 CET>
 
 
 ## ----------------------------
@@ -45,8 +45,6 @@ endif
 CC = g++
 # DEBUG = -g -DDEBUG
 CFLAGS = -Wall -O3 -I./src $(DEBUG) -fopenmp
-OBJS = main.o mandeldraw.o mtexture.o colorspaces.o \
-	mousebox.o mwindow.o bmpio.o # benchmark.o
 # BENCHMARK = benchmark
 PROG = mandeldraw
 
@@ -56,14 +54,7 @@ PROG = mandeldraw
 all: $(PROG) 
 
 
-# $(BENCHMARK): build/benchmark.o build/mtexture.o build/colorspaces.o build/bmpio.o
-# 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
-
-# build/benchmark.o: src/benchmark.cpp src/mtexture.h
-# 	$(CC) -c $(CFLAGS) -o $@ src/benchmark.cpp
-
-
-$(PROG): build/main.o build/mandeldraw.o build/mtexture.o build/colorspaces.o build/mousebox.o build/mwindow.o build/bmpio.o
+$(PROG): build/main.o build/mandeldraw.o build/mtexture.o build/colorspaces.o build/mousebox.o build/mwindow.o build/bmpio.o build/log.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 build/main.o: src/main.cpp src/mandeldraw.h
@@ -87,8 +78,10 @@ build/mwindow.o: src/mwindow.h src/mwindow.cpp src/log.h
 build/bmpio.o: src/bmpio.h src/bmpio.cpp src/log.h
 	$(CC) -c $(CFLAGS) -o $@ src/bmpio.cpp
 
+build/log.o: src/log.cpp src/log.h
+	$(CC) -c $(CFLAGS) -o $@ src/log.cpp
 clean:
-	$(RMCMD) $(PROG) $(addprefix build$(SLASH), $(OBJS))
+	$(RMCMD) $(PROG) build$(SLASH)*
 
 
 

@@ -1,7 +1,7 @@
 /*
  * @(#)bmpio.cpp
  * @author Karl Ljungkvist
- * Last changed: <2010-03-13 09:38:08 CET>
+ * Last changed: <2010-03-15 18:58:30 CET>
  *
  * Mostly stolen from here:
  * http://www.siggraph.org/education/materials/HyperVis/asp_data/compimag/bmpfile.htm
@@ -46,7 +46,7 @@ typedef struct {
 void write_to_BMP(const char *filename, const float *pixels, int width, int height)
 {
 
-    LOG("write_to_BMP(%s, 0x%x, %d, %d)\n", \
+    DBGLOG("write_to_BMP(%s, 0x%x, %d, %d)\n", \
 	filename, (unsigned int)pixels, width, height);
 
     BMPMAGIC bmag;

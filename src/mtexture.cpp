@@ -1,6 +1,6 @@
 /*
  * @(#)mtexture.cpp
- * Last changed: <2010-03-14 18:16:52 CET>
+ * Last changed: <2010-03-15 18:43:36 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -48,7 +48,8 @@ Mtexture::Mtexture(double ulx, double uly, double dx, int width,
 		   int height, int maxIter, int aaLvl)
 {
 
-    LOG("Mtexture::Mtexture(%f, %f, %f, %d, %d, %d, %d)\n",ulx,uly,dx,width,height, maxIter, aaLvl);
+    DBGLOG("Mtexture::Mtexture(%f, %f, %f, %d, %d, %d, %d)\n",\
+	   ulx,uly,dx,width,height, maxIter, aaLvl);
     
     this->ulx = ulx;
     this->uly = uly;
@@ -96,29 +97,29 @@ void Mtexture::reset(double ulx, double uly, double dx, int width,
 
 void Mtexture::zoomToBox(Mousebox &box)
 {
-    LOG("Mtexture::zoomToBox(box)%c",'\n');
+    DBGLOG("Mtexture::zoomToBox(box)%c",'\n');
     
     this-> ulx += this->width*this->dx*box.click_x;
     this-> uly -= this->height*this->dx*box.click_y;
 
     this->dx = this->dx * (box.curr_x - box.click_x);
 
-    LOG("   ulx: %f, uly: %f, dx: %f\n", this->ulx, this->uly, this->dx);
+    DBGLOG("   ulx: %f, uly: %f, dx: %f\n", this->ulx, this->uly, this->dx);
 
     this->outdate();
 }
 
 void Mtexture::resize(int w, int h)
 {
-    LOG("Mtexture::resize(%d, %d)\n",w,h);
+    DBGLOG("Mtexture::resize(%d, %d)\n",w,h);
     
     this->dx = this->dx * double(this->height) / double(h);
-    LOG("   this->dx: %f\n",this->dx);
+    DBGLOG("   this->dx: %f\n",this->dx);
     
     this->width = w;
     this->height = h;
 
-    LOG("    new size of array: %d\n",3*this->width*this->height);
+    DBGLOG("    new size of array: %d\n",3*this->width*this->height);
     delete[] this->pixels;
     this->pixels = new float[3*this->width*this->height];
 
@@ -148,7 +149,7 @@ void Mtexture::setAALvl(int lvl)
 void Mtexture::compute()
 {
 
-    LOG("Mtexture::compute()%c",'\n');
+    DBGLOG("Mtexture::compute()%c",'\n');
     clock_t cpu_tic = clock();
 #ifdef _OPENMP
     double w_tic, w_toc;
@@ -157,7 +158,8 @@ void Mtexture::compute()
     
     
     double lly = this->uly - (this->height-1)*this->dx;
-    LOG("   uly: %f, lly: %f, height: %d, dx: %f\n", this->uly, lly, this->height, this->dx);
+    DBGLOG("   uly: %f, lly: %f, height: %d, dx: %f\n", \
+	   this->uly, lly, this->height, this->dx);
     int row, col;
 
     const int n_side = 1 << this->aaLvl;
@@ -165,7 +167,7 @@ void Mtexture::compute()
 
     int maxIter = this->initialMaxIter * (1 - log2( (this->dx/ n_side) / INITIAL_DX));
 
-    LOG("   n_side: %d, maxIter: %d\n", n_side, maxIter);
+    DBGLOG("   n_side: %d, maxIter: %d\n", n_side, maxIter);
     
     const int nrows = this->height;
     const int ncols = this->width;
@@ -234,7 +236,7 @@ void Mtexture::compute()
 	
 	break;
     default:
-	cerr << "Invalid antialiasing level specified" << endl;
+	WARNLOG("Invalid antialiasing level specified%c",'\n');
 	exit(1);
 	break;
     }
@@ -242,15 +244,14 @@ void Mtexture::compute()
     uptodate = true;
     
     clock_t cpu_toc = clock();
-    cout << "Time in compute:" << endl;
+    INFOLOG("Time in compute:%c", '\n');
 #ifdef _OPENMP
     w_toc = omp_get_wtime();
-    cout << "\tWall: "<< w_toc -  w_tic << " s" << endl;
+    INFOLOG("\tWall: %f s\n", (w_toc -  w_tic));
 #endif
-    cout << "\tCPU: "<< ((double)(cpu_toc-cpu_tic))/CLOCKS_PER_SEC << " s" << endl;
+    INFOLOG("\tCPU: %f s\n", ((double)(cpu_toc-cpu_tic))/CLOCKS_PER_SEC);
     
 }
-
 
 
 
