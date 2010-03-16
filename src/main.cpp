@@ -1,7 +1,7 @@
 
 /*
  * @(#)main.cpp
- * Last changed: <2010-03-15 19:38:07 CET>
+ * Last changed: <2010-03-16 07:31:54 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 {
 
     WARNINGS = true;
-    VERBOSE = false;
+    VERBOSE = true;
     
     const char flags[] = "a:i:hvq";
     int opt;
@@ -99,8 +99,8 @@ void usage()
 {
     cout << "Usage: mandeldraw [-v] [-a <level> ] [-i <iterations>]" << endl
 	 << endl
-	 << "       -v : Be verbose -- i.e. print maximum info output." << endl
-	 << "       -q : Be quiet -- i.e. STFU. (default)" << endl
+	 << "       -v : Be verbose -- i.e. print maximum info output. (default)" << endl
+	 << "       -q : Be quiet -- i.e. STFU." << endl
 	 << "       -a : Specifies the level of supersampling (0, 1, 2, 3)." << endl
 	 << "            Note: This is the square root of the 2-logarithm of" << endl
 	 << "            the number of points per pixel, i.e. l where (2^l)*(2^l)" << endl

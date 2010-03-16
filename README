@@ -10,8 +10,8 @@ This program displays a pretty view of the Mandelbrot set and its surroundings.
 
 mandeldraw [-v] [-a <level> ] [-i <iterations>]
 
-       -v : Be verbose -- i.e. print maximum info output.
-       -q : Be quiet -- i.e. STFU. (default)
+       -v : Be verbose -- i.e. print maximum info output. (default)
+       -q : Be quiet -- i.e. STFU.
        -a : Specifies the level of supersampling (0, 1, 2, 3).
             Note: This is the square root of the 2-logarithm of
             the number of points per pixel, i.e. l where (2^l)*(2^l)

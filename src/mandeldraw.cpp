@@ -1,6 +1,6 @@
 /*
  * @(#)mandeldraw.cpp
- * Last changed: <2010-03-15 19:05:22 CET>
+ * Last changed: <2010-03-16 07:31:25 CET>
  * @author Karl Ljungkvist
  *
  * 
@@ -57,9 +57,8 @@ void keyFunc(unsigned char key, int x, int y)
     {
 	int lvl;
 	
-	printf("Set level of supersampling (give l where 2^l * 2^l\n");
-	printf(" is the number of points per pixel). Please give something\n");
-	printf("reasonable (i.e. 0-3): ");
+	printf("Set level of supersampling (give l where 2^l * 2^l is the number of points per pixel).\n");
+	printf("Please give something reasonable (i.e. 0-3): ");
 	
 	
 	if(scanf("%d",&lvl) == EOF)
