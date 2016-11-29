@@ -1,10 +1,4 @@
-### README --- 
-
-## Author: Karl Ljungkvist (k.ljungkvist@gmail.com)
-## Keywords: 
-
 This program displays a pretty view of the Mandelbrot set and its surroundings.
-
 
 ------ Synopsis ------
 
@@ -26,10 +20,10 @@ In the program the following keys are defined:
 
     q   : 
     ESC : Quit the program
-    w	: Write the current view to the bitmap file 'mandelbrot.bmp' in the
-    	  current working directory
-    b	: Benchmark. Jump to a predefined state.
-    i	: Increase the max-iterations base value.
-    I	: Decrease the max-iterations base value.
-    a	: Change the anti aliasing level (will launch a prompt).
+    w	 : Write the current view to the bitmap file 'mandelbrot.bmp' in the
+      	   current working directory
+    b	 : Benchmark. Jump to a predefined state.
+    i	 : Increase the max-iterations base value.
+    I	 : Decrease the max-iterations base value.
+    a	 : Change the anti aliasing level (will launch a prompt).
     
